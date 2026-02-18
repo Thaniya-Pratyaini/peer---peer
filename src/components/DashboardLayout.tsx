@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       )}>
         <div className="flex items-center gap-2 border-b border-border px-4 py-4">
           <GraduationCap className="h-6 w-6 text-primary" />
-          <span className="text-lg font-bold text-foreground">MentorHub</span>
+          <span className="text-lg font-bold text-foreground">REC-PEP</span>
           <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
             <X className="h-5 w-5 text-muted-foreground" />
           </button>
