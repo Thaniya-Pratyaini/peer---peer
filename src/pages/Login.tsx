@@ -7,10 +7,13 @@ import { GraduationCap, Loader2 } from 'lucide-react';
 
 const roles: Role[] = ['Admin', 'Mentor', 'Mentee'];
 const roleRoutes: Record<Role, string> = { Admin: '/admin', Mentor: '/mentor', Mentee: '/mentee' };
+const rolePasswords: Record<Role, string> = { Admin: 'admin123', Mentor: 'mentor123', Mentee: 'mentee123' };
 
 export default function Login() {
   const [name, setName] = useState('');
   const [role, setRole] = useState<Role>('Mentee');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { setUser } = useAuth();
   const navigate = useNavigate();
@@ -18,6 +21,11 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+    if (password !== rolePasswords[role]) {
+      setError('Incorrect password');
+      return;
+    }
+    setError('');
     setLoading(true);
     try {
       const user = await login(name, role);
@@ -62,6 +70,20 @@ export default function Login() {
               {roles.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Enter password"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              required
+            />
+          </div>
+
+          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <button
             type="submit"
