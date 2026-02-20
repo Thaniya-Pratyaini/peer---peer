@@ -3,12 +3,12 @@ import { Resource, SessionRecord, Todo, MentorMenteeMapping, User } from '@/type
 const delay = (ms = 500) => new Promise(r => setTimeout(r, ms));
 
 const mockUsers: User[] = [
-  { id: 'admin-1', name: 'Dr. Smith', role: 'Admin' },
-  { id: 'mentor-1', name: 'Alice Johnson', role: 'Mentor' },
-  { id: 'mentor-2', name: 'Bob Williams', role: 'Mentor' },
-  { id: 'mentee-1', name: 'Charlie Brown', role: 'Mentee' },
-  { id: 'mentee-2', name: 'Diana Ross', role: 'Mentee' },
-  { id: 'mentee-3', name: 'Eve Davis', role: 'Mentee' },
+  { id: 'admin-1', name: 'Admin', role: 'Admin' },
+  { id: 'mentor-1', name: 'Mentor', role: 'Mentor' },
+  { id: 'mentor-2', name: 'Mentor', role: 'Mentor' },
+  { id: 'mentee-1', name: 'Mentee', role: 'Mentee' },
+  { id: 'mentee-2', name: 'Mentee', role: 'Mentee' },
+  { id: 'mentee-3', name: 'Mentee', role: 'Mentee' },
 ];
 
 let mockMappings: MentorMenteeMapping[] = [
@@ -35,12 +35,40 @@ let mockMeetLinks: Record<string, string> = {
   'mentor-1': 'https://meet.google.com/abc-defg-hij',
 };
 
+const credentialsByUserId: Record<string, string> = {
+  'admin-1': 'admin123',
+  'mentor-1': 'mentor123',
+  'mentor-2': 'mentor123',
+  'mentee-1': 'mentee123',
+  'mentee-2': 'mentee123',
+  'mentee-3': 'mentee123',
+};
+
 // --- API Functions ---
 
-export async function login(name: string, role: string): Promise<User> {
+export async function login(name: string, role: string, password: string): Promise<User> {
   await delay();
-  const existing = mockUsers.find(u => u.role === role);
-  return existing || { id: `${role.toLowerCase()}-${Date.now()}`, name, role: role as User['role'] };
+  const normalizedName = name.trim().toLowerCase();
+  const existing = mockUsers.find(u => u.role === role && u.name.trim().toLowerCase() === normalizedName);
+  if (!existing) throw new Error('User not found');
+  const storedPassword = credentialsByUserId[existing.id];
+  if (storedPassword !== password) throw new Error('Incorrect password');
+  return existing;
+}
+
+export async function createUserByAdmin(name: string, role: 'Mentor' | 'Mentee', password: string): Promise<User> {
+  await delay();
+  const cleanName = name.trim();
+  const cleanPassword = password.trim();
+  if (!cleanName || !cleanPassword) throw new Error('Name and password are required');
+
+  const duplicate = mockUsers.find(u => u.role === role && u.name.trim().toLowerCase() === cleanName.toLowerCase());
+  if (duplicate) throw new Error(`${role} with this name already exists`);
+
+  const user: User = { id: `${role.toLowerCase()}-${Date.now()}`, name: cleanName, role };
+  mockUsers.push(user);
+  credentialsByUserId[user.id] = cleanPassword;
+  return user;
 }
 
 export async function mapMentor(mentorId: string, menteeId: string): Promise<MentorMenteeMapping> {

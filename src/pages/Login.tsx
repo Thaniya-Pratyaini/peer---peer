@@ -7,7 +7,6 @@ import { GraduationCap, Loader2 } from 'lucide-react';
 
 const roles: Role[] = ['Admin', 'Mentor', 'Mentee'];
 const roleRoutes: Record<Role, string> = { Admin: '/admin', Mentor: '/mentor', Mentee: '/mentee' };
-const rolePasswords: Record<Role, string> = { Admin: 'admin123', Mentor: 'mentor123', Mentee: 'mentee123' };
 
 export default function Login() {
   const [name, setName] = useState('');
@@ -21,16 +20,15 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    if (password !== rolePasswords[role]) {
-      setError('Incorrect password');
-      return;
-    }
     setError('');
     setLoading(true);
     try {
-      const user = await login(name, role);
+      const user = await login(name, role, password);
       setUser(user);
       navigate(roleRoutes[role]);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -43,7 +41,7 @@ export default function Login() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
             <GraduationCap className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">REC-PEP</h1>
+          <h1 className="text-2xl font-bold text-foreground">Thaniya pratyaini</h1>
           <p className="mt-1 text-sm text-muted-foreground">Peer-to-Peer English Communication Program</p>
         </div>
 
