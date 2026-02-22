@@ -25,7 +25,7 @@ export default function Login() {
     try {
       const user = await login(name, role, password);
       setUser(user);
-      navigate(roleRoutes[role]);
+      navigate(roleRoutes[user.role]);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);

@@ -7,17 +7,22 @@ export default function UploadResources() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !title.trim()) return;
     setLoading(true);
     setSuccess(false);
+    setError('');
     try {
       await uploadPdf(file, title);
       setSuccess(true);
       setTitle('');
       setFile(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to upload file';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -43,6 +48,7 @@ export default function UploadResources() {
             <CheckCircle2 className="h-4 w-4" /> Uploaded successfully!
           </div>
         )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <button type="submit" disabled={loading}
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}

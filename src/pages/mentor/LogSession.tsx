@@ -13,6 +13,7 @@ export default function LogSession() {
   const [nextSteps, setNextSteps] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (user) getAssignedMentees(user.id).then(setMentees);
@@ -23,11 +24,10 @@ export default function LogSession() {
     if (!user || !menteeId) return;
     setLoading(true);
     setSuccess(false);
-    const mentee = mentees.find(m => m.id === menteeId);
+    setError('');
     try {
       await logSession({
-        mentorName: user.name,
-        menteeName: mentee?.name || '',
+        menteeId,
         date: new Date().toISOString().split('T')[0],
         fluencyScore: fluency,
         confidenceScore: confidence,
@@ -37,6 +37,10 @@ export default function LogSession() {
       setSuccess(true);
       setNotes('');
       setNextSteps('');
+      setMenteeId('');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to log session';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -77,6 +81,7 @@ export default function LogSession() {
             placeholder="What should the mentee focus on next?" required />
         </div>
         {success && <div className="flex items-center gap-2 text-sm text-green-600"><CheckCircle2 className="h-4 w-4" /> Session logged!</div>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <button type="submit" disabled={loading}
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}

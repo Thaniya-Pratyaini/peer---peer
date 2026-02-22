@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { User } from '@/types';
+import { clearStoredAuth, getStoredUser, setStoredUser } from '@/lib/auth-storage';
 
 interface AuthContextType {
   user: User | null;
@@ -10,12 +11,20 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [userState, setUserState] = useState<User | null>(() => getStoredUser());
 
-  const logout = () => setUser(null);
+  const setUser = (nextUser: User | null) => {
+    setUserState(nextUser);
+    setStoredUser(nextUser);
+  };
+
+  const logout = () => {
+    clearStoredAuth();
+    setUserState(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout }}>
+    <AuthContext.Provider value={{ user: userState, setUser, logout }}>
       {children}
     </AuthContext.Provider>
   );
